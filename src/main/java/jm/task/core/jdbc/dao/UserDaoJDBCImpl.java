@@ -1,5 +1,6 @@
 package jm.task.core.jdbc.dao;
 
+import jdk.jshell.spi.SPIResolutionException;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import java.sql.*;
@@ -31,14 +32,13 @@ public class UserDaoJDBCImpl implements UserDao {
             Statement statement = Util.getConnection().createStatement();
             statement.executeUpdate("DROP TABLE IF EXISTS user");
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println("Таблицы не сущеcтвует.");
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
         try {
-            Connection connection = Util.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO user (name, lastName, age) VALUES (?,?,?);");
+            PreparedStatement preparedStatement = Util.getConnection().prepareStatement("INSERT INTO user (name, lastName, age) VALUES (?,?,?);");
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
@@ -50,7 +50,14 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-
+        try{
+            PreparedStatement preparedStatement = Util.getConnection().prepareStatement("DELETE FROM user where id = ?;");
+            preparedStatement.setLong(1, id);
+            preparedStatement.executeUpdate();
+            System.out.printf("Пользователь с ID %d удалён.\n", id);
+        } catch (SQLException e) {
+            System.out.println("Пользователя с таким ID не существует.");
+        }
     }
 
     public List<User> getAllUsers() {
@@ -59,6 +66,7 @@ public class UserDaoJDBCImpl implements UserDao {
            ResultSet resultSet =statement.executeQuery("SELECT * FROM  user");
            while (resultSet.next()) {
                User user = new User();
+               user.setId(resultSet.getLong("id"));
                user.setName(resultSet.getString("name"));
                user.setLastName(resultSet.getString("lastName"));
                user.setAge(resultSet.getByte("age"));

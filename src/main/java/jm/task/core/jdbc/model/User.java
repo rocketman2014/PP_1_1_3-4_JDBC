@@ -44,10 +44,12 @@ public class User {
 
     @Override
     public String toString() {
-        return "Пользователь {" +
-                "Имя=" + name +
-                ", Фамилия=" + lastName +
-                ", Возраст=" + age + "}\n";
+        return "Пользователь{" +
+                "ID=" + id +
+                ", Имя='" + name + '\'' +
+                ", Фамилия='" + lastName + '\'' +
+                ", Возраст=" + age +
+                '}';
     }
 
     public Long getId() {
