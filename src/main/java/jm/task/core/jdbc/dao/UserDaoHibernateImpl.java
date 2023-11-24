@@ -1,8 +1,15 @@
 package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
+import jm.task.core.jdbc.util.Util;
+import org.hibernate.*;
 
+//import javax.persistence.*;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 public class UserDaoHibernateImpl implements UserDao {
     public UserDaoHibernateImpl() {
@@ -12,31 +19,72 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
-
+        try(Statement statement = Util.getConnection().createStatement()) {
+                statement.execute("""
+                        CREATE TABLE IF NOT EXISTS user (
+                               id  INT NOT NULL AUTO_INCREMENT ,
+                               name        VARCHAR(50)     null,
+                               lastName    VARCHAR(50)     null,
+                               age         INT             null,
+                               PRIMARY KEY(id));""");
+            System.out.println("Таблица создана.");
+        } catch (SQLException | HibernateException e) {
+            System.out.println("Таблица не создана");
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void dropUsersTable() {
-
+        try( Statement statement = Util.getConnection().createStatement()) {
+            statement.executeUpdate("DROP TABLE IF EXISTS user;");
+        } catch (SQLException e) {
+            System.out.println("Таблицы не сущеcтвует.");
+        }
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-
+        User user = new User(name, lastName, age);
+        try (Session session = Util.getCorrennSession()) {
+            Transaction transaction = session.beginTransaction();
+            session.persist(user);
+            transaction.commit();
+            System.out.printf("User с именем %s добавлен в базу данных.\n", name);
+        } catch (HibernateException e) {
+            System.out.println("Пользователь не добавлен.");
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void removeUserById(long id) {
-
+        try (Session session = Util.getCorrennSession()) {
+            Transaction transaction = session.beginTransaction();
+            User user = session.get(User.class, id);
+            session.remove(user);
+            transaction.commit();
+            System.out.printf("Пользователь с ID %d удалён.\n", id);
+        }catch (Exception e) {
+            System.out.printf("Пользователь c ID %d не существует или не удалён.", id);
+        }
     }
 
     @Override
     public List<User> getAllUsers() {
-        return null;
+        try (Session session = Util.getCorrennSession()) {
+            return session.createQuery("FROM User", User.class).getResultList();
+        }
     }
 
     @Override
     public void cleanUsersTable() {
-
+        try (Session session = Util.getCorrennSession()) {
+            Transaction transaction = session.beginTransaction();
+            session.createQuery("delete from User").executeUpdate();
+            transaction.commit();
+        } catch (HibernateException e) {
+            System.out.println("Таблица не отчистилась или её не существует.");
+        }
     }
 }

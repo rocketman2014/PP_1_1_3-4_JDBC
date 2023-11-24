@@ -1,13 +1,12 @@
 package jm.task.core.jdbc.model;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Objects;
-
+import jakarta.persistence.*;
+@Entity
 @Table
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
@@ -49,7 +48,7 @@ public class User {
                 ", Имя='" + name + '\'' +
                 ", Фамилия='" + lastName + '\'' +
                 ", Возраст=" + age +
-                '}';
+                "}\n";
     }
 
     public Long getId() {
