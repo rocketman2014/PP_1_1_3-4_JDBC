@@ -4,12 +4,10 @@ import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.*;
 
-//import javax.persistence.*;
+
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 public class UserDaoHibernateImpl implements UserDao {
     public UserDaoHibernateImpl() {
@@ -23,9 +21,9 @@ public class UserDaoHibernateImpl implements UserDao {
                 statement.execute("""
                         CREATE TABLE IF NOT EXISTS user (
                                id  INT NOT NULL AUTO_INCREMENT ,
-                               name        VARCHAR(50)     null,
-                               lastName    VARCHAR(50)     null,
-                               age         INT             null,
+                               name        VARCHAR(50)    not null,
+                               lastName    VARCHAR(50)    not null,
+                               age         INT            not null,
                                PRIMARY KEY(id));""");
             System.out.println("Таблица создана.");
         } catch (SQLException | HibernateException e) {
@@ -38,6 +36,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() {
         try( Statement statement = Util.getConnection().createStatement()) {
             statement.executeUpdate("DROP TABLE IF EXISTS user;");
+            System.out.println("Таблица удалена.");
         } catch (SQLException e) {
             System.out.println("Таблицы не сущеcтвует.");
         }
@@ -45,10 +44,9 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        User user = new User(name, lastName, age);
         try (Session session = Util.getCorrennSession()) {
             Transaction transaction = session.beginTransaction();
-            session.persist(user);
+            session.persist(new User(name, lastName, age));
             transaction.commit();
             System.out.printf("User с именем %s добавлен в базу данных.\n", name);
         } catch (HibernateException e) {
@@ -83,6 +81,7 @@ public class UserDaoHibernateImpl implements UserDao {
             Transaction transaction = session.beginTransaction();
             session.createQuery("delete from User").executeUpdate();
             transaction.commit();
+            System.out.println("Все данные пользователей удалены.");
         } catch (HibernateException e) {
             System.out.println("Таблица не отчистилась или её не существует.");
         }
