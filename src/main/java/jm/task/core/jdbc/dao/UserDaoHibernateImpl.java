@@ -2,14 +2,18 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
-import org.hibernate.*;
-
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
+    private SessionFactory sessionFactory = Util.getCorrennSession();
+
     public UserDaoHibernateImpl() {
 
     }
@@ -17,14 +21,14 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
-        try(Statement statement = Util.getConnection().createStatement()) {
-                statement.execute("""
-                        CREATE TABLE IF NOT EXISTS user (
-                               id  INT NOT NULL AUTO_INCREMENT ,
-                               name        VARCHAR(50)    not null,
-                               lastName    VARCHAR(50)    not null,
-                               age         INT            not null,
-                               PRIMARY KEY(id));""");
+        try (Statement statement = Util.getConnection().createStatement()) {
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS user (
+                           id  INT NOT NULL AUTO_INCREMENT ,
+                           name        VARCHAR(50)    not null,
+                           lastName    VARCHAR(50)    not null,
+                           age         INT            not null,
+                           PRIMARY KEY(id));""");
             System.out.println("Таблица создана.");
         } catch (SQLException | HibernateException e) {
             System.out.println("Таблица не создана");
@@ -34,7 +38,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void dropUsersTable() {
-        try( Statement statement = Util.getConnection().createStatement()) {
+        try (Statement statement = Util.getConnection().createStatement()) {
             statement.executeUpdate("DROP TABLE IF EXISTS user;");
             System.out.println("Таблица удалена.");
         } catch (SQLException e) {
@@ -44,7 +48,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        try (Session session = Util.getCorrennSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
             session.persist(new User(name, lastName, age));
             transaction.commit();
@@ -57,20 +61,20 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void removeUserById(long id) {
-        try (Session session = Util.getCorrennSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
             User user = session.get(User.class, id);
             session.remove(user);
             transaction.commit();
             System.out.printf("Пользователь с ID %d удалён.\n", id);
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.printf("Пользователь c ID %d не существует или не удалён.", id);
         }
     }
 
     @Override
     public List<User> getAllUsers() {
-        try (Session session = Util.getCorrennSession()) {
+        try (Session session = sessionFactory.openSession()) {
             List<User> ses = session.createQuery("FROM User", User.class).getResultList();
             System.out.println(ses);
             return ses;
@@ -82,10 +86,9 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void cleanUsersTable() {
-        try (Session session = Util.getCorrennSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
             session.createQuery("delete from User").executeUpdate();
-            transaction.commit();
             System.out.println("Все данные пользователей удалены.");
         } catch (HibernateException e) {
             System.out.println("Таблица не отчистилась или её не существует.");

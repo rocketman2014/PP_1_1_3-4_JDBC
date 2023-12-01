@@ -1,7 +1,14 @@
 package jm.task.core.jdbc.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 import java.util.Objects;
-import jakarta.persistence.*;
+
 @Entity
 @Table
 public class User {
@@ -44,11 +51,11 @@ public class User {
     @Override
     public String toString() {
         return "Пользователь{" +
-                "ID=" + id +
-                ", Имя='" + name + '\'' +
-                ", Фамилия='" + lastName + '\'' +
-                ", Возраст=" + age +
-                "}\n";
+               "ID=" + id +
+               ", Имя='" + name + '\'' +
+               ", Фамилия='" + lastName + '\'' +
+               ", Возраст=" + age +
+               "}\n";
     }
 
     public Long getId() {
