@@ -20,6 +20,7 @@ public class UserDaoJDBCImpl implements UserDao {
                                lastName    VARCHAR(50)     null,
                                age         INT             null,
                                PRIMARY KEY (id));""");
+            System.out.println("Таблица создана.");
         } catch (SQLException e) {
             System.out.println("Таблица не создана");
         }
@@ -28,6 +29,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void dropUsersTable() {
         try( Statement statement = Util.getConnection().createStatement()) {
             statement.executeUpdate("DROP TABLE IF EXISTS user;");
+            System.out.println("Таблица удалена.");
         } catch (SQLException e) {
             System.out.println("Таблицы не сущеcтвует.");
         }
@@ -40,6 +42,7 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
             preparedStatement.executeUpdate();
+            System.out.printf("User с именем %s добавлен в базу данных.\n", name);
         } catch (SQLException | NullPointerException exception) {
             System.out.println("Пользователь не добавлен");
         }
@@ -77,6 +80,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void cleanUsersTable() {
         try(Statement statement = Util.getConnection().createStatement()) {
             statement.execute("TRUNCATE TABLE user");
+            System.out.println("Все данные пользователей удалены.");
         } catch (SQLException e) {
             System.out.println("Таблицы не существует.");
         }

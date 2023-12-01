@@ -71,7 +71,12 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public List<User> getAllUsers() {
         try (Session session = Util.getCorrennSession()) {
-            return session.createQuery("FROM User", User.class).getResultList();
+            List<User> ses = session.createQuery("FROM User", User.class).getResultList();
+            System.out.println(ses);
+            return ses;
+        } catch (HibernateException e) {
+            System.out.println("Пользователи не могут быть выведены из-за ошибки.");
+            throw e;
         }
     }
 
